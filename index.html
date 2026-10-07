@@ -25,25 +25,13 @@
         h1 {
             font-size: 2.5rem;
             text-shadow: 0 0 10px #ff0000;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         p {
             color: #cccccc;
             font-size: 1.2rem;
             margin-bottom: 20px;
-        }
-
-        /* Styl globalnego licznika */
-        .licznik-kontener {
-            font-size: 1.1rem;
-            color: #00ff00;
-            text-shadow: 0 0 5px #00ff00;
-            margin-bottom: 30px;
-            border: 1px solid #00ff00;
-            padding: 8px 15px;
-            background-color: rgba(0, 50, 0, 0.4);
-            border-radius: 5px;
         }
 
         .bomba-container {
@@ -104,12 +92,6 @@
 <body>
 
     <h1>PROTOKÓŁ INICJACYJNY</h1>
-    
-    <!-- Sekcja globalnego licznika z bazy danych -->
-    <div class="licznik-kontener">
-        ZDETONOWANO GLOBALNIE: <span id="globalny-licznik">Ładowanie...</span> RAZY
-    </div>
-
     <p id="instrukcja">Uderz 3 razy w spację lub kliknij ładunek, aby uzbroić...</p>
 
     <div class="bomba-container" id="klikacz" onclick="zarejestrujAkcje()">
@@ -123,27 +105,6 @@
 
         const instrukcjaTxt = document.getElementById('instrukcja');
         const bombaDiv = document.getElementById('bomba');
-        const globalnyLicznikSpan = document.getElementById('globalny-licznik');
-
-        // Nazwa Twojego folderu projektowego jako unikalny klucz
-        const countApiKey = "saveritus1_kodyatomowe";
-
-        // POPRAWIONE NA V2: Pobranie aktualnego stanu licznika
-        fetch(`https://api.counterapi.dev/v1/${countApiKey}/get`)
-            .then(res => res.json())
-            .then(data => {
-                // Jeśli baza v1 nie działa, przełączamy na uproszczone zapytanie v2
-                globalnyLicznikSpan.innerText = data.value || 0;
-            })
-            .catch(() => {
-                // Zapytanie zapasowe dopasowane do najnowszego standardu API
-                fetch(`https://api.counterapi.dev/v1/${countApiKey}/create?value=0`)
-                    .then(() => { globalnyLicznikSpan.innerText = "0"; })
-                    .catch(() => {
-                        // Ostateczne wymuszenie pobrania wartości w przypadku blokad
-                        globalnyLicznikSpan.innerText = "1"; 
-                    });
-            });
 
         const dzwiekSyrenyURL = "syrena.mp3.mp3";
         const dzwiekWybuchuURL = "bum.mp3.mp3";
@@ -201,22 +162,6 @@
             const wybuch = new Audio(dzwiekWybuchuURL);
             wybuch.play();
 
-            // Zmiana wartości na stałe na ekranie
-            let aktWartosc = parseInt(globalnyLicznikSpan.innerText) || 0;
-            globalnyLicznikSpan.innerText = aktWartosc + 1;
-
-            // POPRAWIONE NA V2: Zwiększenie wartości licznika w API (używamy bezpiecznego przekierowania)
-            fetch(`https://api.counterapi.dev/v1/${countApiKey}/up`)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.value) globalnyLicznikSpan.innerText = data.value;
-                }).catch(() => {
-                    // Rezerwowy zapis w lokalnej pamięci jeśli zewnętrzne API odrzuci połączenie CORS
-                    let lokalny = localStorage.getItem('detonacje') || 0;
-                    lokalny = parseInt(lokalny) + 1;
-                    localStorage.setItem('detonacje', lokalny);
-                });
-
             pobierzArchiwumZdjec();
         }
 
@@ -242,5 +187,4 @@
         });
     </script>
 </body>
-
- 
+</html>
