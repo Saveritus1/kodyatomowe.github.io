@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projekt atomowy</title>
+    <title>Projekt atomowy V2</title>
     <style>
         body {
             margin: 0;
@@ -19,21 +19,34 @@
             text-align: center;
             user-select: none;
             overflow: hidden;
+            transition: background 0.5s ease;
         }
 
         h1 {
             font-size: 2.5rem;
             text-shadow: 0 0 10px #ff0000;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         p {
             color: #cccccc;
             font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Styl globalnego licznika */
+        .licznik-kontener {
+            font-size: 1.1rem;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+            margin-bottom: 30px;
+            border: 1px solid #00ff00;
+            padding: 8px 15px;
+            background-color: rgba(0, 50, 0, 0.4);
+            border-radius: 5px;
         }
 
         .bomba-container {
-            margin-top: 30px;
             cursor: pointer;
             transition: transform 0.1s;
         }
@@ -42,6 +55,7 @@
             font-size: 120px;
             display: block;
             filter: drop-shadow(0 0 15px #ff5500);
+            transition: all 0.3s ease;
         }
 
         .drzenie {
@@ -62,19 +76,40 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        .blysk {
-            animation: explosion-flash 0.5s ease-out forwards;
+        /* Animacja dynamicznego tła wybuchu (Grzyb atomowy i łuna) */
+        .wybuch-tla {
+            animation: nuclear-glow 4s ease-out forwards;
         }
 
-        @keyframes explosion-flash {
+        @keyframes nuclear-glow {
             0% { background-color: #ffffff; }
-            100% { background-color: #000000; }
+            5% { background-color: #ff3300; }
+            15% { background-color: #ffcc00; }
+            40% { background-color: #2b1100; }
+            100% { background-color: #0d0500; }
+        }
+
+        /* Skalowanie grzyba atomowego po eksplozji */
+        .grzyb-animacja {
+            animation: grow-mushroom 3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes grow-mushroom {
+            0% { transform: scale(0.3); filter: drop-shadow(0 0 50px #fff) brightness(5); }
+            20% { transform: scale(1.2); filter: drop-shadow(0 0 40px #ff5500) brightness(1.5); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 20px #000); }
         }
     </style>
 </head>
 <body>
 
     <h1>PROTOKÓŁ INICJACYJNY</h1>
+    
+    <!-- Sekcja globalnego licznika z bazy danych -->
+    <div class="licznik-kontener">
+        ZDETONOWANO GLOBALNIE: <span id="globalny-licznik">Ładowanie...</span> RAZY
+    </div>
+
     <p id="instrukcja">Uderz 3 razy w spację lub kliknij ładunek, aby uzbroić...</p>
 
     <div class="bomba-container" id="klikacz" onclick="zarejestrujAkcje()">
@@ -88,23 +123,32 @@
 
         const instrukcjaTxt = document.getElementById('instrukcja');
         const bombaDiv = document.getElementById('bomba');
+        const globalnyLicznikSpan = document.getElementById('globalny-licznik');
 
-        // ==========================================
-        // POPRAWIONE: DODANE CUDZYSŁOWY DO DŹWIĘKÓW
-        // ==========================================
+        // Unikalny klucz dla Twojego licznika (wykorzystuje Twój login z GitHuba, aby nikt go nie nadpisał)
+        const countApiKey = "saveritus1_kodyatomowe_detonacje";
+
+        // Pobranie aktualnego stanu licznika z bazy przy uruchomieniu strony
+        fetch(`https://countapi.xyz{countApiKey}`)
+            .then(res => res.json())
+            .then(data => {
+                globalnyLicznikSpan.innerText = data.value || 0;
+            })
+            .catch(() => {
+                // Jeśli klucz jeszcze nie istnieje w bazie, ustawiamy początkowe 0
+                globalnyLicznikSpan.innerText = "0";
+            });
+
         const dzwiekSyrenyURL = "syrena.mp3.mp3";
         const dzwiekWybuchuURL = "bum.mp3.mp3";
 
-        // ==========================================
-        // POPRAWIONE: DODANE CUDZYSŁOWY DO LINKÓW ZDJĘĆ
-        // ==========================================
         const zdjeciaBitew = [
             { nazwa: "coś.jpg", url: "https://gstatic.com" },
             { nazwa: "bum.jpg", url: "https://gstatic.com" },
             { nazwa: "bitwa_3.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_4.jpg", url: "https://gstatic.com" },
             { nazwa: "bitwa_5.jpg", url: "https://gstatic.com" },
-            { nazwa: "bitwa_6.jpg", url: "https://wikimedia.org" },
+            { nazna: "bitwa_6.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_7.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_8.jpg", url: "https://gstatic.com" },
             { nazwa: "bitwa_9.jpg", url: "https://gstatic.com" },
@@ -131,7 +175,7 @@
             bombaDiv.classList.add('drzenie');
 
             const syrena = new Audio(dzwiekSyrenyURL);
-            syrena.play().catch(e => console.log("Musisz najpierw kliknąć na stronę, aby dźwięk zadziałał!"));
+            syrena.play().catch(e => console.log("Interakcja wymagana!"));
 
             setTimeout(() => {
                 syrena.pause();
@@ -140,19 +184,29 @@
         }
 
         function detonacja() {
-            instrukcjaTxt.innerText = "Zrzut danych zakończony.";
-            bombaDiv.innerText = "💥";
-            bombaDiv.classList.remove('drzenie');
+            instrukcjaTxt.innerText = "KATASTROFA ATOMOWA. Zrzut danych zakończony.";
             
-            document.body.classList.add('blysk');
+            // Zmiana ikony na potężny wybuch / grzyb atomowy i dodanie animacji wzrostu
+            bombaDiv.innerText = "🍄"; 
+            bombaDiv.classList.remove('drzenie');
+            bombaDiv.classList.add('grzyb-animacja');
+            
+            // Dodanie dynamicznej symulacji fali uderzeniowej i zmiany barw tła
+            document.body.classList.add('wybuch-tla');
 
             const wybuch = new Audio(dzwiekWybuchuURL);
             wybuch.play();
 
+            // Zwiększenie wartości licznika w globalnej bazie danych o +1
+            fetch(`https://countapi.xyz{countApiKey}`)
+                .then(res => res.json())
+                .then(data => {
+                    globalnyLicznikSpan.innerText = data.value;
+                });
+
             pobierzArchiwumZdjec();
         }
 
-        // POPRAWIONE: Zmiana zdzetie.url na zdjecie.url
         function pobierzArchiwumZdjec() {
             zdjeciaBitew.forEach((zdjecie, index) => {
                 setTimeout(() => {
@@ -176,4 +230,5 @@
     </script>
 </body>
 </html>
+
 
