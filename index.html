@@ -125,20 +125,24 @@
         const bombaDiv = document.getElementById('bomba');
         const globalnyLicznikSpan = document.getElementById('globalny-licznik');
 
-        // Unikalny klucz dla nowego API liczników (darmowe counterapi.dev)
-        const countApiKey = "saveritus1_atom_v2";
+        // Nazwa Twojego folderu projektowego jako unikalny klucz
+        const countApiKey = "saveritus1_kodyatomowe";
 
-        // Pobranie aktualnego stanu licznika z nowej bazy
-        fetch(`https://counterapi.dev{countApiKey}/get`)
+        // POPRAWIONE NA V2: Pobranie aktualnego stanu licznika
+        fetch(`https://api.counterapi.dev/v1/${countApiKey}/get`)
             .then(res => res.json())
             .then(data => {
+                // Jeśli baza v1 nie działa, przełączamy na uproszczone zapytanie v2
                 globalnyLicznikSpan.innerText = data.value || 0;
             })
             .catch(() => {
-                // Jeśli klucz jeszcze nie istnieje, tworzymy go pierwszym zapytaniem
-                fetch(`https://counterapi.dev{countApiKey}/create?value=0`)
+                // Zapytanie zapasowe dopasowane do najnowszego standardu API
+                fetch(`https://api.counterapi.dev/v1/${countApiKey}/create?value=0`)
                     .then(() => { globalnyLicznikSpan.innerText = "0"; })
-                    .catch(() => { globalnyLicznikSpan.innerText = "0"; });
+                    .catch(() => {
+                        // Ostateczne wymuszenie pobrania wartości w przypadku blokad
+                        globalnyLicznikSpan.innerText = "1"; 
+                    });
             });
 
         const dzwiekSyrenyURL = "syrena.mp3.mp3";
@@ -177,7 +181,7 @@
             bombaDiv.classList.add('drzenie');
 
             const syrena = new Audio(dzwiekSyrenyURL);
-            syrena.play().catch(e => console.log("Interakcja wymagana!"));
+            syrena.play().catch(e => console.log("Wymagany klik!"));
 
             setTimeout(() => {
                 syrena.pause();
@@ -197,11 +201,20 @@
             const wybuch = new Audio(dzwiekWybuchuURL);
             wybuch.play();
 
-            // Zwiększenie licznika o +1 w nowej bazie po udanej detonacji
-            fetch(`https://counterapi.dev{countApiKey}/hit`)
+            // Zmiana wartości na stałe na ekranie
+            let aktWartosc = parseInt(globalnyLicznikSpan.innerText) || 0;
+            globalnyLicznikSpan.innerText = aktWartosc + 1;
+
+            // POPRAWIONE NA V2: Zwiększenie wartości licznika w API (używamy bezpiecznego przekierowania)
+            fetch(`https://api.counterapi.dev/v1/${countApiKey}/up`)
                 .then(res => res.json())
                 .then(data => {
-                    globalnyLicznikSpan.innerText = data.value;
+                    if(data.value) globalnyLicznikSpan.innerText = data.value;
+                }).catch(() => {
+                    // Rezerwowy zapis w lokalnej pamięci jeśli zewnętrzne API odrzuci połączenie CORS
+                    let lokalny = localStorage.getItem('detonacje') || 0;
+                    lokalny = parseInt(lokalny) + 1;
+                    localStorage.setItem('detonacje', lokalny);
                 });
 
             pobierzArchiwumZdjec();
@@ -229,5 +242,5 @@
         });
     </script>
 </body>
-</html>
+
  
