@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekt atomowy</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #ff3333;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #ff0000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #cccccc;
+            font-size: 1.2rem;
+        }
+
+        .bomba-container {
+            margin-top: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #bomba {
+            font-size: 120px;
+            display: block;
+            filter: drop-shadow(0 0 15px #ff5500);
+        }
+
+        .drzenie {
+            animation: shake 0.1s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .blysk {
+            animation: explosion-flash 0.5s ease-out forwards;
+        }
+
+        @keyframes explosion-flash {
+            0% { background-color: #ffffff; }
+            100% { background-color: #000000; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>PROTOKÓŁ INICJACYJNY</h1>
+    <p id="instrukcja">Uderz 3 razy w spację lub kliknij ładunek, aby uzbroić...</p>
+
+    <div class="bomba-container" id="klikacz" onclick="zarejestrujAkcje()">
+        <div id="bomba">💣</div>
+    </div>
+
+    <script>
+        let licznik = 0;
+        const wymaganeKlikniecia = 3;
+        let uruchomiono = false;
+
+        const instrukcjaTxt = document.getElementById('instrukcja');
+        const bombaDiv = document.getElementById('bomba');
+
+        // ==========================================
+        // POPRAWIONE: DODANE CUDZYSŁOWY DO DŹWIĘKÓW
+        // ==========================================
+        const dzwiekSyrenyURL = "syrena.mp3.mp3";
+        const dzwiekWybuchuURL = "bum.mp3.mp3";
+
+        // ==========================================
+        // POPRAWIONE: DODANE CUDZYSŁOWY DO LINKÓW ZDJĘĆ
+        // ==========================================
+        const zdjeciaBitew = [
+            { nazwa: "coś.jpg", url: "https://gstatic.com" },
+            { nazwa: "bum.jpg", url: "https://gstatic.com" },
+            { nazwa: "bitwa_3.jpg", url: "https://wikimedia.org" },
+            { nazwa: "bitwa_4.jpg", url: "https://gstatic.com" },
+            { nazwa: "bitwa_5.jpg", url: "https://gstatic.com" },
+            { nazwa: "bitwa_6.jpg", url: "https://wikimedia.org" },
+            { nazwa: "bitwa_7.jpg", url: "https://wikimedia.org" },
+            { nazwa: "bitwa_8.jpg", url: "https://gstatic.com" },
+            { nazwa: "bitwa_9.jpg", url: "https://gstatic.com" },
+            { nazwa: "bitwa_10.jpg", url: "https://gstatic.com" }
+        ];
+
+        function zarejestrujAkcje() {
+            if (uruchomiono) return;
+            
+            if (licznik < wymaganeKlikniecia) {
+                licznik++;
+                if (licznik === 1) bombaDiv.innerText = "🧨";
+                if (licznik === 2) bombaDiv.innerText = "☢️";
+
+                if (licznik === wymaganeKlikniecia) {
+                    odliczanieAtomowe();
+                }
+            }
+        }
+
+        function odliczanieAtomowe() {
+            uruchomiono = true;
+            instrukcjaTxt.innerText = "UWAGA! ATAK POWIETRZNY! DETONACJA ZA 5 SEKUND...";
+            bombaDiv.classList.add('drzenie');
+
+            const syrena = new Audio(dzwiekSyrenyURL);
+            syrena.play().catch(e => console.log("Musisz najpierw kliknąć na stronę, aby dźwięk zadziałał!"));
+
+            setTimeout(() => {
+                syrena.pause();
+                detonacja();
+            }, 5000);
+        }
+
+        function detonacja() {
+            instrukcjaTxt.innerText = "Zrzut danych zakończony.";
+            bombaDiv.innerText = "💥";
+            bombaDiv.classList.remove('drzenie');
+            
+            document.body.classList.add('blysk');
+
+            const wybuch = new Audio(dzwiekWybuchuURL);
+            wybuch.play();
+
+            pobierzArchiwumZdjec();
+        }
+
+        // POPRAWIONE: Zmiana zdzetie.url na zdjecie.url
+        function pobierzArchiwumZdjec() {
+            zdjeciaBitew.forEach((zdjecie, index) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = zdjecie.url;
+                    link.download = zdjecie.nazwa;
+                    link.target = "_blank";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, index * 300); 
+            });
+        }
+
+        window.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                zarejestrujAkcje();
+            }
+        });
+    </script>
+</body>
+</html>
+
