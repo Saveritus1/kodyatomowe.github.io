@@ -125,18 +125,20 @@
         const bombaDiv = document.getElementById('bomba');
         const globalnyLicznikSpan = document.getElementById('globalny-licznik');
 
-        // Unikalny klucz dla Twojego licznika (wykorzystuje Twój login z GitHuba, aby nikt go nie nadpisał)
-        const countApiKey = "saveritus1_kodyatomowe_detonacje";
+        // Unikalny klucz dla nowego API liczników (darmowe counterapi.dev)
+        const countApiKey = "saveritus1_atom_v2";
 
-        // Pobranie aktualnego stanu licznika z bazy przy uruchomieniu strony
-        fetch(`https://countapi.xyz{countApiKey}`)
+        // Pobranie aktualnego stanu licznika z nowej bazy
+        fetch(`https://counterapi.dev{countApiKey}/get`)
             .then(res => res.json())
             .then(data => {
                 globalnyLicznikSpan.innerText = data.value || 0;
             })
             .catch(() => {
-                // Jeśli klucz jeszcze nie istnieje w bazie, ustawiamy początkowe 0
-                globalnyLicznikSpan.innerText = "0";
+                // Jeśli klucz jeszcze nie istnieje, tworzymy go pierwszym zapytaniem
+                fetch(`https://counterapi.dev{countApiKey}/create?value=0`)
+                    .then(() => { globalnyLicznikSpan.innerText = "0"; })
+                    .catch(() => { globalnyLicznikSpan.innerText = "0"; });
             });
 
         const dzwiekSyrenyURL = "syrena.mp3.mp3";
@@ -148,7 +150,7 @@
             { nazwa: "bitwa_3.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_4.jpg", url: "https://gstatic.com" },
             { nazwa: "bitwa_5.jpg", url: "https://gstatic.com" },
-            { nazna: "bitwa_6.jpg", url: "https://wikimedia.org" },
+            { nazwa: "bitwa_6.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_7.jpg", url: "https://wikimedia.org" },
             { nazwa: "bitwa_8.jpg", url: "https://gstatic.com" },
             { nazwa: "bitwa_9.jpg", url: "https://gstatic.com" },
@@ -186,19 +188,17 @@
         function detonacja() {
             instrukcjaTxt.innerText = "KATASTROFA ATOMOWA. Zrzut danych zakończony.";
             
-            // Zmiana ikony na potężny wybuch / grzyb atomowy i dodanie animacji wzrostu
             bombaDiv.innerText = "🍄"; 
             bombaDiv.classList.remove('drzenie');
             bombaDiv.classList.add('grzyb-animacja');
             
-            // Dodanie dynamicznej symulacji fali uderzeniowej i zmiany barw tła
             document.body.classList.add('wybuch-tla');
 
             const wybuch = new Audio(dzwiekWybuchuURL);
             wybuch.play();
 
-            // Zwiększenie wartości licznika w globalnej bazie danych o +1
-            fetch(`https://countapi.xyz{countApiKey}`)
+            // Zwiększenie licznika o +1 w nowej bazie po udanej detonacji
+            fetch(`https://counterapi.dev{countApiKey}/hit`)
                 .then(res => res.json())
                 .then(data => {
                     globalnyLicznikSpan.innerText = data.value;
@@ -230,5 +230,3 @@
     </script>
 </body>
 </html>
-
-
